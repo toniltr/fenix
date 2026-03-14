@@ -1,0 +1,212 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum Visibility {
+  PRIVATE
+  PUBLIC
+}
+
+enum StoryStatus {
+  DRAFT
+  PUBLISHED
+  BANNED
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  GITHUB
+}
+
+enum AuthStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum ActorKind {
+  PLAYER
+  NPC
+  PROP
+  ITEM
+  SYSTEM
+}
+
+enum ConnectionType {
+  DOOR
+  PORTAL
+  PATH
+  STAIRS
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  uuid         String    @unique @default(uuid())
+  email        String    @unique
+  username     String    @unique
+  passwordHash String?
+  role         UserRole  @default(USER)
+  isActive     Boolean   @default(true)
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  stories      Story[]
+  auths        Auth[]
+  actors       Actor[]   @relation("ActorOwner")
+
+  @@index([uuid])
+  @@index([email])
+  @@index([username])
+}
+
+model Auth {
+  id               Int          @id @default(autoincrement())
+  uuid             String       @unique @default(uuid())
+
+  userId           Int
+  provider         AuthProvider @default(LOCAL)
+  status           AuthStatus   @default(ACTIVE)
+
+  providerUserId   String?
+  sessionId        String?      @unique
+  refreshTokenHash String?
+  ipAddress        String?
+  userAgent        String?
+  lastLoginAt      DateTime?
+  expiresAt        DateTime?
+
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([uuid])
+  @@index([userId])
+  @@index([provider])
+  @@index([status])
+  @@index([sessionId])
+}
+
+model Story {
+  id           Int         @id @default(autoincrement())
+  uuid         String      @unique @default(uuid())
+  slug         String      @unique
+  name         String
+  summary      String?
+  visibility   Visibility  @default(PRIVATE)
+  status       StoryStatus @default(DRAFT)
+
+  authorId     Int
+  startRoomId  Int?
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  author       User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  rooms        Room[]
+  startRoom    Room?       @relation("StoryStartRoom", fields: [startRoomId], references: [id], onDelete: SetNull)
+
+  @@index([uuid])
+  @@index([slug])
+  @@index([authorId])
+  @@index([visibility])
+  @@index([status])
+  @@index([startRoomId])
+}
+
+model Room {
+  id              Int              @id @default(autoincrement())
+  uuid            String           @unique @default(uuid())
+  name            String
+  slug            String?
+  description     String?
+  orderIndex      Int              @default(0)
+
+  storyId         Int
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  story           Story            @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  actors          Actor[]
+
+  outgoingLinks   RoomConnection[] @relation("RoomConnectionFrom")
+  incomingLinks   RoomConnection[] @relation("RoomConnectionTo")
+
+  storyStartFor   Story[]          @relation("StoryStartRoom")
+
+  @@index([uuid])
+  @@index([storyId])
+  @@index([storyId, orderIndex])
+  @@unique([storyId, slug])
+}
+
+model RoomConnection {
+  id            Int            @id @default(autoincrement())
+  uuid          String         @unique @default(uuid())
+
+  fromRoomId    Int
+  toRoomId      Int
+
+  name          String?
+  description   String?
+  type          ConnectionType @default(DOOR)
+  isLocked      Boolean        @default(false)
+  isHidden      Boolean        @default(false)
+  isOneWay      Boolean        @default(false)
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  fromRoom      Room           @relation("RoomConnectionFrom", fields: [fromRoomId], references: [id], onDelete: Cascade)
+  toRoom        Room           @relation("RoomConnectionTo", fields: [toRoomId], references: [id], onDelete: Cascade)
+
+  @@index([uuid])
+  @@index([fromRoomId])
+  @@index([toRoomId])
+  @@index([fromRoomId, toRoomId])
+}
+
+model Actor {
+  id          Int        @id @default(autoincrement())
+  uuid        String     @unique @default(uuid())
+  name        String
+  kind        ActorKind  @default(NPC)
+  description String?
+  metadata    String?
+  isActive    Boolean    @default(true)
+
+  x           Float      @default(0)
+  y           Float      @default(0)
+  z           Float      @default(0)
+
+  roomId      Int
+  ownerId     Int?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  room        Room       @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  owner       User?      @relation("ActorOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([uuid])
+  @@index([roomId])
+  @@index([ownerId])
+  @@index([kind])
+  @@index([roomId, x, y, z])
+}

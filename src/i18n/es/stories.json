@@ -1,0 +1,6 @@
+{
+  "NOT_FOUND": "Story no encontrada",
+  "FORBIDDEN_UPDATE": "No puedes editar esta story",
+  "FORBIDDEN_DELETE": "No puedes borrar esta story",
+  "DELETE_SUCCESS": "Story eliminada correctamente"
+}

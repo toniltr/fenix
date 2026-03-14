@@ -1,0 +1,7 @@
+{
+  "NOT_FOUND": "Sala no encontrada",
+  "FORBIDDEN_CREATE": "No puedes crear salas en esta story",
+  "FORBIDDEN_UPDATE": "No puedes editar esta sala",
+  "FORBIDDEN_DELETE": "No puedes borrar esta sala",
+  "DELETE_SUCCESS": "Sala eliminada correctamente"
+}

@@ -1,0 +1,7 @@
+{
+  "NOT_FOUND": "Room not found",
+  "FORBIDDEN_CREATE": "You cannot create rooms in this story",
+  "FORBIDDEN_UPDATE": "You cannot edit this room",
+  "FORBIDDEN_DELETE": "You cannot delete this room",
+  "DELETE_SUCCESS": "Room deleted successfully"
+}
