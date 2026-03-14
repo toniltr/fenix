@@ -9,6 +9,7 @@ import {
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { DocsController } from './docs.controller';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
@@ -29,7 +30,7 @@ import { RoomsModule } from './rooms/rooms.module';
         AcceptLanguageResolver,
       ],
   }), UsersModule, PrismaModule, AuthModule, StoriesModule, RoomsModule],
-  controllers: [AppController],
+  controllers: [AppController, DocsController],
   providers: [AppService, PrismaService],
 })
 export class AppModule {}
