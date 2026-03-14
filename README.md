@@ -44,6 +44,16 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## API REST documentation
+
+Con el servidor levantado, puedes abrir la documentación interactiva en:
+
+- `http://localhost:3000/api/docs`
+
+La especificación OpenAPI en JSON está disponible en:
+
+- `http://localhost:3000/api/docs/openapi.json`
+
 ## Run tests
 
 ```bash
